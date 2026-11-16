@@ -325,3 +325,32 @@ adminRouter.patch(
     res.json({ ok: true });
   }),
 );
+
+/** Repair outcomes for staff review (diagnostic accuracy, success, verification). No customer PII is selected. */
+adminRouter.get(
+  '/repair-outcomes',
+  ah(async (req, res) => {
+    const { limit, offset } = pageParams(req.query);
+    const status = typeof req.query.status === 'string' && req.query.status ? req.query.status : null;
+    const succeeded = req.query.succeeded === 'true' ? true : req.query.succeeded === 'false' ? false : null;
+    const rows = await query(
+      `SELECT o.id, o.succeeded, o.verification_status, o.top_hypothesis_correct, o.cost_cents, o.currency, o.duration_minutes, o.created_at,
+              o.initial_hypotheses, o.tests_performed, o.components_replaced, o.actual_failure_text, o.follow_up_status,
+              fm.name AS actual_failure_mode, p.name AS product_name, p.model_number, org.name AS organization, u.display_name AS reporter,
+              coalesce((SELECT array_agg(s.name) FROM symptoms s WHERE s.id = ANY(o.symptom_ids)), '{}') AS symptoms,
+              count(*) OVER()::int AS total
+         FROM repair_outcomes o LEFT JOIN failure_modes fm ON fm.id = o.actual_failure_mode_id LEFT JOIN products p ON p.id = o.product_id
+         LEFT JOIN organizations org ON org.id = o.organization_id LEFT JOIN users u ON u.id = o.reporter_id
+        WHERE ($3::text IS NULL OR o.verification_status = $3) AND ($4::boolean IS NULL OR o.succeeded = $4)
+        ORDER BY o.created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset, status, succeeded],
+    );
+    const summary = await one(
+      `SELECT count(*)::int AS total, count(*) FILTER (WHERE succeeded)::int AS succeeded,
+              count(*) FILTER (WHERE top_hypothesis_correct)::int AS top_correct, count(*) FILTER (WHERE top_hypothesis_correct IS NOT NULL)::int AS evaluated,
+              count(*) FILTER (WHERE verification_status = 'verified')::int AS verified, count(*) FILTER (WHERE verification_status = 'pending_review')::int AS pending
+         FROM repair_outcomes`,
+    );
+    res.json({ outcomes: rows, total: rows[0]?.total ?? 0, summary });
+  }),
+);

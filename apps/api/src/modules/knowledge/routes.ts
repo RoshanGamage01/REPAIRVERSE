@@ -136,6 +136,23 @@ knowledgeRouter.patch(
 );
 
 knowledgeRouter.post(
+  '/component-types',
+  staffOnly,
+  ah(async (req, res) => {
+    const name = String(req.body?.name ?? '').trim();
+    if (name.length < 2) throw badRequest('Name required');
+    const risk = ['low', 'medium', 'high'].includes(req.body?.defaultRisk) ? req.body.defaultRisk : 'medium';
+    const attrs = Array.isArray(req.body?.compatAttributes)
+      ? [...new Set((req.body.compatAttributes as unknown[]).map((a) => String(a).trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_')).filter(Boolean))].slice(0, 20)
+      : [];
+    const slug = String(req.body?.slug ?? name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+    const ct = await one(`INSERT INTO component_types(slug, name, description, default_risk, compat_attributes) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [slug, name, req.body?.description ?? null, risk, attrs]);
+    await audit(req, 'component_type.created', 'component_type', ct!.id, { slug, attrs });
+    res.status(201).json({ id: ct!.id });
+  }),
+);
+
+knowledgeRouter.post(
   '/procedures',
   staffOnly,
   ah(async (req, res) => {
