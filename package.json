@@ -2,10 +2,10 @@
   "name": "repairverse",
   "private": true,
   "version": "0.1.0",
-  "description": "REPAIRVERSE — Global Repair Intelligence Platform",
+  "description": "REPAIRVERSE \u2014 Global Repair Intelligence Platform",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter ./apps/** dev",
-    "build": "pnpm --filter @repairverse/shared build && pnpm --filter @repairverse/api build && pnpm --filter @repairverse/web build",
+    "dev": "node init && pnpm -r --parallel --filter ./apps/** dev",
+    "build": "node init && pnpm --filter @repairverse/shared build && pnpm --filter @repairverse/api build && pnpm --filter @repairverse/web build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @repairverse/shared build && pnpm -r test",
     "db:migrate": "pnpm --filter @repairverse/api db:migrate",
@@ -13,5 +13,7 @@
     "db:reset": "pnpm --filter @repairverse/api db:reset"
   },
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

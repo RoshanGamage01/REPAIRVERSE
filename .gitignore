@@ -1,7 +1,5 @@
 node_modules
 dist
-.env
-.env.local
 storage/
 coverage
 *.log
@@ -9,3 +7,5 @@ playwright-report
 test-results
 .DS_Store
 storage-test/
+dump.rdb
+config.bat
