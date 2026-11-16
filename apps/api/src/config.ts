@@ -1,5 +1,9 @@
-import 'dotenv/config';
+import { resolve } from 'node:path';
+import dotenv from 'dotenv';
 import { z } from 'zod';
+
+// Load apps/api/.env first, then the repository-root .env (values already set win).
+dotenv.config({ path: [resolve(process.cwd(), '.env'), resolve(process.cwd(), '../../.env')], quiet: true } as any);
 
 const Env = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

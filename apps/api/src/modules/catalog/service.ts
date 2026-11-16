@@ -122,7 +122,9 @@ export async function productProfile(idOrSlug: string, user?: AuthUser) {
   ]);
   const sources = await sourcesFor([{ type: 'product', id: p.id }, ...failures.map((f) => ({ type: 'failure_mode', id: f.id }))]);
   const compatibleParts = await query(
-    `SELECT pc.state, pc.verification_status, pa.id, pa.name, pa.part_number, pa.classification, ct.name AS component_type, pc.variant_id
+    // Unreviewed "confirmed" claims are displayed as potential — only reviewed records are confirmed.
+    `SELECT CASE WHEN pc.state = 'confirmed' AND pc.verification_status NOT IN ('verified','demo') THEN 'potential' ELSE pc.state END AS state,
+            pc.verification_status, pa.id, pa.name, pa.part_number, pa.classification, ct.name AS component_type, pc.variant_id
        FROM part_compatibility pc JOIN parts pa ON pa.id = pc.part_id JOIN component_types ct ON ct.id = pa.component_type_id
       WHERE pc.product_id = $1 AND pc.verification_status <> 'rejected' ORDER BY ct.name, pc.state`,
     [p.id],
@@ -188,7 +190,8 @@ export async function componentProfile(componentId: string, user?: AuthUser) {
       [c.component_type_id, c.product_id, cats],
     ),
     query(
-      `SELECT pa.id, pa.name, pa.part_number, pa.classification, pc.state, pc.verification_status FROM parts pa
+      `SELECT pa.id, pa.name, pa.part_number, pa.classification, pc.verification_status,
+              CASE WHEN pc.state = 'confirmed' AND pc.verification_status NOT IN ('verified','demo') THEN 'potential' ELSE pc.state END AS state FROM parts pa
          LEFT JOIN part_compatibility pc ON pc.part_id = pa.id AND pc.product_id = $2 AND (pc.variant_id IS NULL OR pc.variant_id IS NOT DISTINCT FROM $3)
         WHERE pa.component_type_id = $1 ORDER BY pc.state NULLS LAST, pa.name LIMIT 30`,
       [c.component_type_id, c.product_id, c.variant_id],

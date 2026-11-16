@@ -49,16 +49,3 @@ export async function migrate({ reset = false } = {}): Promise<string[]> {
     client.release();
   }
 }
-
-const isMain = process.argv[1] && fileURLToPath(import.meta.url).replace(/\.ts$/, '') === process.argv[1].replace(/\.(ts|js)$/, '');
-if (isMain) {
-  migrate({ reset: process.argv.includes('--reset') })
-    .then((a) => {
-      console.log(a.length ? `Applied: ${a.join(', ')}` : 'Database up to date');
-      return pool.end();
-    })
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    });
-}

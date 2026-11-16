@@ -1,8 +1,7 @@
-import { fileURLToPath } from 'node:url';
 import type pg from 'pg';
 import { hashPassword } from '../lib/auth.js';
 import { DEFAULT_MODELS } from '../ai/orchestrator.js';
-import { pool, tx } from './pool.js';
+import { tx } from './pool.js';
 import * as D from './seedData.js';
 
 export interface SeedOptions {
@@ -239,20 +238,4 @@ export async function seed(opts: SeedOptions) {
     await db.query(`INSERT INTO device_events(device_id, kind, title, occurred_at, created_by) VALUES ($1,'registered','Added to My Devices', now() - interval '3 years', $2)`, [dev, consumer]);
   });
   if (!opts.quiet) console.log(`Seed complete${opts.demo ? ' (with demonstration data)' : ''}.`);
-}
-
-const isMain = process.argv[1] && fileURLToPath(import.meta.url).replace(/\.ts$/, '') === process.argv[1].replace(/\.(ts|js)$/, '');
-if (isMain) {
-  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@repairverse.dev';
-  const adminPassword = process.env.ADMIN_PASSWORD ?? (process.env.NODE_ENV === 'production' ? '' : 'admin-password-123');
-  if (!adminPassword) {
-    console.error('ADMIN_PASSWORD is required in production');
-    process.exit(1);
-  }
-  seed({ demo: (process.env.SEED_DEMO ?? (process.env.NODE_ENV === 'production' ? 'false' : 'true')) === 'true', adminEmail, adminPassword })
-    .then(() => pool.end())
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    });
 }

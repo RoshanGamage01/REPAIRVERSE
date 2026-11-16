@@ -193,5 +193,10 @@ describe('Scenario D — part compatibility', () => {
     expect(r.body.verificationStatus).toBe('pending_review');
     const check = await c.get(`/api/v1/parts/compatibility/check?partId=${ram}&productId=${productId}`);
     expect(check.body.state).toBe('potential'); // unverified claim is never shown as confirmed
+    const profile = await c.get(`/api/v1/products/${productId}`);
+    expect(profile.body.compatibleParts.find((p: any) => p.id === ram).state).toBe('potential');
+    const partView = await c.get(`/api/v1/parts/${ram}`);
+    expect(partView.body.compatibility[0].state).toBe('potential');
+    expect(partView.body.compatibility[0].claimed_state).toBe('confirmed');
   });
 });

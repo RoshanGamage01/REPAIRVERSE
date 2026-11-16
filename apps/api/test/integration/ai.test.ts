@@ -15,7 +15,7 @@ class ScriptedProvider implements AIProvider {
     if (!fn) throw new Error(`no script for ${req.schemaName}`);
     return { data: fn(req), usage: { inputTokens: 1000, outputTokens: 200 } };
   }
-  async embed() { throw new Error('embeddings not scripted'); }
+  async embed(): Promise<{ vectors: number[][]; usage: { inputTokens: number; outputTokens: number } }> { throw new Error('embeddings not scripted'); }
   async transcribe() { return { text: 'my laptop screen stays black', usage: { inputTokens: 0, outputTokens: 0 } }; }
 }
 

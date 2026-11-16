@@ -45,7 +45,8 @@ partsRouter.get(
     );
     if (!part) throw notFound('Part');
     const compatibility = await query(
-      `SELECT pc.id, pc.state, pc.verification_status, pc.notes, p.id AS product_id, p.name AS product_name, p.slug AS product_slug, p.model_number, v.name AS variant_name,
+      `SELECT pc.id, CASE WHEN pc.state = 'confirmed' AND pc.verification_status NOT IN ('verified','demo') THEN 'potential' ELSE pc.state END AS state,
+              pc.state AS claimed_state, pc.verification_status, pc.notes, p.id AS product_id, p.name AS product_name, p.slug AS product_slug, p.model_number, v.name AS variant_name,
               coalesce(json_agg(json_build_object('kind', e.kind, 'description', e.description, 'sourceTitle', s.title, 'sourceUrl', s.url)) FILTER (WHERE e.id IS NOT NULL), '[]') AS evidence
          FROM part_compatibility pc JOIN products p ON p.id = pc.product_id LEFT JOIN product_variants v ON v.id = pc.variant_id
          LEFT JOIN compatibility_evidence e ON e.compatibility_id = pc.id LEFT JOIN knowledge_sources s ON s.id = e.source_id
