@@ -127,6 +127,10 @@ export function decideRepairOrReplace(i: DecisionInput): DecisionResult {
   } else if (i.riskLevel === 'high' || i.underWarranty === true || (i.difficulty !== null && i.difficulty >= 4)) {
     recommendation = 'professional_repair_recommended';
     headline = i.underWarranty ? 'Check your warranty first — a professional or manufacturer repair is the safest route.' : 'This repair should be handled by a qualified professional.';
+  } else if (i.difficulty === null && i.riskLevel !== 'low') {
+    // No documented procedure: we cannot responsibly recommend a DIY repair.
+    recommendation = 'professional_repair_recommended';
+    headline = 'No documented repair procedure exists for this failure yet — a professional assessment is the safest route.';
   } else if ((costRatio !== null && costRatio >= 0.6) || i.partsAvailability === 'unavailable') {
     recommendation = 'replacement_may_be_more_economical';
     headline = costRatio !== null && costRatio >= 0.6 ? 'Known repair costs approach the price of a replacement.' : 'Compatible parts are not currently available.';

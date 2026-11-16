@@ -67,7 +67,13 @@ export function createApp() {
 
   const v1 = express.Router();
   v1.use(sessionMiddleware, csrfGuard, rateLimit({ name: 'global', limit: config.RATE_LIMIT_PER_MINUTE }));
-  v1.get('/status', ah(async (_req, res) => res.json({ ai: await aiAvailability(), version: '1' })));
+  v1.get(
+    '/status',
+    ah(async (_req, res) => {
+      const demo = await one('SELECT EXISTS (SELECT 1 FROM products WHERE is_demo) AS d');
+      res.json({ ai: await aiAvailability(), demoData: !!demo?.d, version: '1' });
+    }),
+  );
   v1.use('/auth', authRouter);
   v1.use('/', catalogRouter);
   v1.use('/files', filesRouter);

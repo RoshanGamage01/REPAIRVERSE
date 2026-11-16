@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: 17 19 24;
+    --ink-soft: 52 56 66;
+    --ink-muted: 107 112 125;
+    --ink-faint: 160 164 175;
+    --paper: 246 245 241;
+    --paper-raised: 255 255 255;
+    --paper-sunken: 237 235 229;
+    --line: 226 224 217;
+    --accent: 255 91 35;       /* REPAIRVERSE signal orange: the repair action */
+    --accent-soft: 255 236 228;
+    --accent-ink: 168 47 6;
+    --signal: 58 92 255;       /* intelligence / AI */
+    --signal-soft: 232 236 255;
+    --ok: 17 145 99;
+    --ok-soft: 222 245 235;
+    --warn: 196 120 0;
+    --warn-soft: 253 243 220;
+    --danger: 205 38 38;
+    --danger-soft: 253 230 230;
+    color-scheme: light;
+  }
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-paper text-ink font-sans antialiased; font-feature-settings: 'cv11', 'ss01'; }
+  h1, h2, h3 { @apply tracking-tight; }
+  :focus-visible { @apply outline-none ring-2 ring-accent/60 ring-offset-2 ring-offset-paper; }
+  ::selection { @apply bg-accent/20; }
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted; }
+  .display { @apply font-display font-normal tracking-tight; }
+  .surface { @apply rounded-2xl bg-paper-raised ring-1 ring-line; }
+  .hairline { @apply border-line; }
+  .link { @apply font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-accent; }
+  .scroll-x { @apply flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden; }
+}

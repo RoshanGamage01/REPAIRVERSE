@@ -67,6 +67,10 @@ describe('repair vs replace engine', () => {
     expect(decideRepairOrReplace({ ...base, underWarranty: true }).recommendation).toBe('professional_repair_recommended');
     expect(decideRepairOrReplace({ ...base, difficulty: 5 }).recommendation).toBe('professional_repair_recommended');
   });
+  it('does not recommend DIY repair without a documented procedure', () => {
+    expect(decideRepairOrReplace({ ...base, difficulty: null }).recommendation).toBe('professional_repair_recommended');
+    expect(decideRepairOrReplace({ ...base, difficulty: null, riskLevel: 'low' }).recommendation).toBe('repair_recommended');
+  });
   it('suggests replacement when costs approach replacement price', () => {
     expect(decideRepairOrReplace({ ...base, partsCost: { amountCents: 60000, origin: 'offer' } }).recommendation).toBe('replacement_may_be_more_economical');
   });
